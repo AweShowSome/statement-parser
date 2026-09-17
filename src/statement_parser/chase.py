@@ -196,8 +196,15 @@ def starts_record(line: str) -> bool:
 
 
 def apply_sign(amount: float, sign: Optional[int], is_credit: bool) -> float:
+    """Put a printed amount onto the money-out-is-negative convention.
+
+    For a section with a known direction we multiply rather than take abs(), so
+    that an explicitly negative printed amount -- a reversed deposit, a refunded
+    fee -- comes out as the opposite of its section's usual direction instead of
+    being forced the wrong way.
+    """
     if sign is not None:
-        return abs(amount) * sign
+        return amount * sign
     if is_credit:
         # credit card: printed purchases are positive charges -> spend negative
         return -amount

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Optional
 
 from .chase import parse_chase
 from .extraction import pdf_lines
@@ -43,7 +42,7 @@ def detect_institution(lines: list) -> str:
     return ""
 
 
-def parse_statement(path: Path, folder_label: str, password: Optional[str],
+def parse_statement(path: Path, folder_label: str, password: str | None,
                     x_tol: float, debug: bool = False) -> FileResult:
     """Parse one statement PDF. Never raises for a bad file -- the problem is
     recorded on `FileResult.error` so one unreadable statement cannot abort a

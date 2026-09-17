@@ -11,7 +11,6 @@ from __future__ import annotations
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Optional
 
 from .extraction import (
     MONEY,
@@ -71,7 +70,7 @@ SKIP_SECTIONS = {
 }
 
 
-def match_section(name: str, table: dict) -> Optional[tuple]:
+def match_section(name: str, table: dict) -> tuple | None:
     """Map a heading to (category, sign), tolerating Chase's wording drift.
 
     Exact matches win. Failing that a prefix match in either direction is
@@ -195,7 +194,7 @@ def starts_record(line: str) -> bool:
     return bool(RE_REC_DATE.match(line) or RE_REC_CHECK.match(line))
 
 
-def apply_sign(amount: float, sign: Optional[int], is_credit: bool) -> float:
+def apply_sign(amount: float, sign: int | None, is_credit: bool) -> float:
     """Put a printed amount onto the money-out-is-negative convention.
 
     For a section with a known direction we multiply rather than take abs(), so
@@ -229,8 +228,8 @@ def split_inner_date(desc: str, start, end) -> tuple:
     return clean_desc(desc), ""
 
 
-def build_txn(rec_lines: list, section: Optional[str], sign: Optional[int],
-              is_credit: bool, start, end, new_txn) -> Optional[Txn]:
+def build_txn(rec_lines: list, section: str | None, sign: int | None,
+              is_credit: bool, start, end, new_txn) -> Txn | None:
     """Parse one buffered record (a transaction plus any wrapped lines).
 
     Chase wraps in two different ways and they need opposite handling:

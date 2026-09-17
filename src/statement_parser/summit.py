@@ -17,9 +17,8 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Optional
 
-from .extraction import clean_desc, is_noise, resolve_year, parse_slash, to_money
+from .extraction import clean_desc, is_noise, parse_slash, resolve_year, to_money
 from .models import BalanceCheck, FileResult, Txn
 
 RE_SUMMIT_PERIOD = re.compile(
@@ -63,7 +62,7 @@ def summit_fields(rest: str, maxn: int = 2) -> tuple:
     return rest.strip(), fields
 
 
-def summit_sign(desc: str) -> Optional[int]:
+def summit_sign(desc: str) -> int | None:
     """Summit names the direction in the description, which is unambiguous."""
     d = desc.strip().lower()
     if d.startswith("withdrawal"):
@@ -117,7 +116,9 @@ def summit_fix_balances(block: dict) -> None:
         closing = block.get("closing")
         if closing is not None and abs(abs(run) - abs(closing)) > 0.01:
             continue
-        for t, value in zip(txns, rebuilt):
+        # Lengths always match here: `ok` can only be True if the loop above ran
+        # to completion, appending one rebuilt figure per transaction.
+        for t, value in zip(txns, rebuilt, strict=True):
             t.balance = value
         return
 
@@ -139,9 +140,9 @@ def parse_summit(path: Path, folder_label: str, lines: list, res: FileResult) ->
             res.period = f"{start.isoformat()} to {end.isoformat()}"
 
     blocks: list = []
-    cur: Optional[dict] = None
+    cur: dict | None = None
     in_table = False
-    pending: Optional[Txn] = None
+    pending: Txn | None = None
     cont_used = 0
     discarded = 0
 

@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Optional
 
 COLUMNS = [
     "institution",     # chase | summit
@@ -38,7 +37,7 @@ class Txn:
     description: str = ""
     amount: float = 0.0
     type: str = ""
-    balance: Optional[float] = None
+    balance: float | None = None
     account: str = ""
     account_type: str = ""
     check_no: str = ""
@@ -79,8 +78,8 @@ class FileResult:
     period: str = ""
     txns: list = field(default_factory=list)
     checks: list = field(default_factory=list)
-    opening_balance: Optional[float] = None
-    closing_balance: Optional[float] = None
+    opening_balance: float | None = None
+    closing_balance: float | None = None
     error: str = ""
     # Records the parser looked at and deliberately did not turn into a
     # transaction (foreign-exchange detail lines, Summit status rows). Counted
@@ -89,7 +88,7 @@ class FileResult:
     discarded: int = 0
 
     @property
-    def reconciles(self) -> Optional[bool]:
+    def reconciles(self) -> bool | None:
         """True / False, or None when the statement stated no totals to check."""
         if not self.checks:
             return None

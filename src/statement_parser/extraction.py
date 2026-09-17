@@ -11,7 +11,6 @@ import datetime as dt
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 try:
     import pdfplumber
@@ -38,7 +37,7 @@ MONTHS = {
 }
 
 
-def to_money(s: str) -> Optional[float]:
+def to_money(s: str) -> float | None:
     """'1,234.56' / '-$45.23' / '(45.23)' / '45.23-' -> float."""
     if s is None:
         return None
@@ -79,7 +78,7 @@ def money_tokens(text: str) -> list:
     return out
 
 
-def parse_slash(s: str) -> Optional[dt.date]:
+def parse_slash(s: str) -> dt.date | None:
     parts = s.split("/")
     if len(parts) != 3:
         return None
@@ -95,8 +94,8 @@ def parse_slash(s: str) -> Optional[dt.date]:
         return None
 
 
-def resolve_year(mo: int, da: int, start: Optional[dt.date],
-                 end: Optional[dt.date]) -> Optional[dt.date]:
+def resolve_year(mo: int, da: int, start: dt.date | None,
+                 end: dt.date | None) -> dt.date | None:
     """Attach the right year to a bare MM/DD using the statement period.
 
     Statements print MM/DD only, so a December-to-January statement contains
@@ -119,10 +118,8 @@ def resolve_year(mo: int, da: int, start: Optional[dt.date],
             d = dt.date(y, mo, da)
         except ValueError:
             continue          # 02/29 in a non-leap year
-        if lo <= d <= hi:
-            pen = 0
-        else:
-            pen = min(abs((d - lo).days), abs((d - hi).days)) + 1000
+        inside = lo <= d <= hi
+        pen = 0 if inside else min(abs((d - lo).days), abs((d - hi).days)) + 1000
         if best_pen is None or pen < best_pen:
             best, best_pen = d, pen
     return best
@@ -231,7 +228,7 @@ def _join(chars: list, x_tol: float) -> str:
         return "".join(c.get("text", "") for c in sorted(chars, key=lambda c: c["x0"]))
 
 
-def pdf_lines(path: Path, password: Optional[str], x_tol: float) -> list:
+def pdf_lines(path: Path, password: str | None, x_tol: float) -> list:
     """Text rows for one statement, in reading order.
 
     Chase tags each statement section with hidden `*start*` / `*end*` text. That

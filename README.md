@@ -14,7 +14,7 @@ number you trust by mistake.
 ## Install
 
 ```bash
-git clone https://github.com/<your-handle>/statement-parser.git
+git clone https://github.com/AweShowSome/statement-parser.git
 cd statement-parser
 python3 -m venv .venv
 source .venv/bin/activate

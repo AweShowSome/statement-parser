@@ -26,6 +26,11 @@ Money LEAVING you is negative; money COMING IN is positive.
   checking:    withdrawals/checks/fees  -> negative, deposits -> positive
   credit card: purchases/fees/interest  -> negative, payments/credits -> positive
 
+Exit codes
+----------
+  0  ran to completion
+  1  nothing could be parsed at all, or --strict and some file did not verify
+  2  bad arguments
 """
 
 
@@ -62,6 +67,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--password", default=None, help="password for locked PDFs")
     ap.add_argument("--x-tolerance", type=float, default=1.5,
                     help="pdfplumber word spacing tolerance (default 1.5)")
+    ap.add_argument("--strict", action="store_true",
+                    help="exit nonzero if any statement fails its balance check "
+                         "or states no totals to check against")
     ap.add_argument("--debug", action="store_true", help="verbose per-file output")
     ap.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return ap
@@ -145,6 +153,13 @@ def main(argv=None) -> int:
     if xlsx_ok:
         print(f"  {args.name}.xlsx")
     print("  parse_report.txt")
+
+    unverified = [r for _, rl in results for r in rl if not r.error and not r.verified]
+    if unverified:
+        print(f"\n{len(unverified)} statement(s) did not verify against their own "
+              f"balance totals — see parse_report.txt", file=sys.stderr)
+        if args.strict:
+            return 1
     return 0
 
 

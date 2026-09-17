@@ -222,7 +222,12 @@ def _join(chars: list, x_tol: float) -> str:
             sorted(chars, key=lambda c: c["x0"]),
             x_tolerance=x_tol, y_tolerance=LINE_TOL, keep_blank_chars=False)
         return " ".join(w["text"] for w in words)
-    except Exception:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
+        # The fallback concatenates characters with no spaces at all, which
+        # poisons every regex downstream, so make the failure audible rather
+        # than returning quietly broken text.
+        print(f"warning: word extraction failed ({exc!r}); "
+              f"falling back to raw character order", file=sys.stderr)
         return "".join(c.get("text", "") for c in sorted(chars, key=lambda c: c["x0"]))
 
 

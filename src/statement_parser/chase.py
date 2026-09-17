@@ -74,14 +74,17 @@ SKIP_SECTIONS = {
 def match_section(name: str, table: dict) -> Optional[tuple]:
     """Map a heading to (category, sign), tolerating Chase's wording drift.
 
-    Exact matches win, then a prefix match in either direction.
+    Exact matches win. Failing that a prefix match in either direction is
+    accepted, but only for a name long enough to be distinctive -- the length
+    guard applies to BOTH directions, so a stray short word cannot open a
+    section.
     """
     n = re.sub(r"[^a-z& ]", "", name.lower()).strip()
     n = re.sub(r"\s+", " ", n)
     if n in table:
         return table[n]
     for key, val in table.items():
-        if n.startswith(key) or key.startswith(n) and len(n) > 6:
+        if (n.startswith(key) or key.startswith(n)) and len(n) > 6:
             return val
     return None
 

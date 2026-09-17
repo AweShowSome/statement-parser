@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "statement-parser"
+version = "1.0.0"
+description = "Turn Chase and Summit Credit Union statement PDFs into clean transaction CSVs."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["pdf", "bank-statement", "csv", "chase", "credit-union"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+]
+dependencies = [
+    "pdfplumber>=0.11.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4",
+    "reportlab>=4.0",
+]
+dev = [
+    "pytest>=7.4",
+    "reportlab>=4.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+statement-parse = "statement_parser.cli:main"
+# Kept so the original `chase_parse.py ...` muscle memory still works. Unlike
+# the old shim script, this one resolves from any directory.
+chase-parse = "statement_parser.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 95
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = [
+    # The parser deliberately catches broad exceptions at the per-file boundary
+    # so that one unreadable statement cannot abort a whole run.
+    "B902",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]

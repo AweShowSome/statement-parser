@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------------------
+# Financial data must never enter this repository.
+#
+# These four rules are the point of this file. They are deliberately blanket
+# rules with NO negated exceptions (`!`), because a single exception is all it
+# takes for a real statement to be committed by accident. Test fixtures are
+# generated into a temp directory at test time precisely so that none is needed.
+# ---------------------------------------------------------------------------
+*.pdf
+*.csv
+*.xlsx
+*.xls
+output/
+parse_report.txt
+
+# Anywhere statements are likely to be kept or dropped
+statements/
+samples/
+tests/samples/
+
+# ---------------------------------------------------------------------------
+# Ordinary Python noise
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ---------------------------------------------------------------------------
+# Editor / OS
+# ---------------------------------------------------------------------------
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -296,23 +296,23 @@ Statement For 04/01/2025 - 04/30/2025
 Member Name: A Sample Member
 Insured by NCUA
 
-PRIMARY SAVINGS ID 0000 Previous Balance $5.34-
+PRIMARY SAVINGS ID 0025 Previous Balance $5.34-
 Date Transaction Description Amount- Balance-
 04/28 Deposit Dividend .12- 5.46-
 Your Account Balances as of 04/30
 New Balance $5.46-
 
-FREE CHECKING ID 0040 Previous Balance $1,240.50-
+FREE CHECKING ID 0071 Previous Balance $1,240.50-
 Date Transaction Description Amount- Balance-
 04/02 Deposit Payroll Example Employer 2,000.00- 3,240.50-
 04/05 Withdrawal Card Purchase Grocery Mart 6112 145.20- 3,095.30-
 04/10 Qualified: Courtesy Overdraft Program - -
 Page 1 of 2
 
-FREE CHECKING ID 0040 Continued from previous page.
+FREE CHECKING ID 0071 Continued from previous page.
 Date Transaction Description Amount- Balance-
 04/12 Withdrawal ACH City Utility Bill Pymt 249.04- 2,846.26-
-04/20 Withdrawal Transfer To Share 0000 2,000.00- 846.26-
+04/20 Withdrawal Transfer To Share 0025 2,000.00- 846.26-
 Your Account Balances as of 04/30
 New Balance $846.26-
 
@@ -327,7 +327,7 @@ Member Statement of Account
 Statement For 05/01/2025 - 05/31/2025
 Insured by NCUA
 
-FREE CHECKING ID 0040 Previous Balance $120.00-
+FREE CHECKING ID 0071 Previous Balance $120.00-
 Date Transaction Description Amount- Balance-
 05/03 Withdrawal Card Purchase Hardware Depot 160.72- 40.72-
 05/09 Deposit Payroll Example Employer 500.00- 459.28-
@@ -344,7 +344,7 @@ Summit Credit Union
 Member Statement of Account
 Statement For 05/01/2021 - 05/31/2021
 
-FREE CHECKNG D 0040 PreviousBalnce $12.0-
+FREE CHECKNG D 0071 PreviousBalnce $12.0-
 Dte Trnsction Descrition Amunt- Blnce-
 05/03 Withdrwl Crd Purchse 16.2- 4.2-
 New Blnce $45.28-
@@ -359,7 +359,7 @@ Member Statement of Account
 Statement For 06/01/2025 - 06/30/2025
 Insured by NCUA
 
-FREE CHECKING ID 0040 Previous Balance $40.72-
+FREE CHECKING ID 0071 Previous Balance $40.72-
 Date Transaction Description Amount- Balance-
 06/09 Deposit Payroll Example Employer 500.00- 459.28-
 Your Account Balances as of 06/30

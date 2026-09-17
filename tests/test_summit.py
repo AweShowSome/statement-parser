@@ -112,13 +112,13 @@ def test_each_share_account_is_reconciled_separately(parsed):
     assert len(r.checks) == 2, "expected one balance check per share account"
     assert all(c.ok for c in r.checks), r.failures()
     labels = " ".join(c.label for c in r.checks)
-    assert "0000" in labels and "0040" in labels
+    assert "0025" in labels and "0071" in labels
 
 
 def test_rows_are_attributed_to_the_right_account(parsed):
     r = parsed["summit_multi_apr2025.pdf"]
-    savings = [t for t in r.txns if t.account == "...0000"]
-    checking = [t for t in r.txns if t.account == "...0040"]
+    savings = [t for t in r.txns if t.account == "...0025"]
+    checking = [t for t in r.txns if t.account == "...0071"]
     assert len(savings) == 1 and savings[0].amount == 0.12
     assert len(checking) == 4
     assert savings[0].account_type == "savings"
@@ -129,7 +129,7 @@ def test_continued_from_previous_page_does_not_start_a_new_account(parsed):
     """The header reappears without a Previous Balance; it is the same block."""
     r = parsed["summit_multi_apr2025.pdf"]
     assert len(r.checks) == 2, "the continuation header opened a third block"
-    checking = [t for t in r.txns if t.account == "...0040"]
+    checking = [t for t in r.txns if t.account == "...0071"]
     # Two rows before the page break, two after.
     assert [t.date for t in checking] == [
         "2025-04-02", "2025-04-05", "2025-04-12", "2025-04-20"]

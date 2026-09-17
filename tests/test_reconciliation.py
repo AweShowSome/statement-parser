@@ -16,6 +16,7 @@ PARSEABLE = [
     "credit_sections_dec2024.pdf",
     "credit_activity_jan2025.pdf",
     "credit_foreign_jun2025.pdf",
+    "checking_lookalike_feb2025.pdf",
     "summit_multi_apr2025.pdf",
     "summit_overdraft_may2025.pdf",
     # summit_negative_open is deliberately absent: it exercises a known

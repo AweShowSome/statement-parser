@@ -28,6 +28,9 @@ What each fixture deliberately exercises, so it survives editing:
                       the foreign-exchange detail lines that must be discarded
                       rather than parsed, and -- the important one -- a real
                       transaction sharing a baseline with an `*end*` marker
+  checking_lookalike  a wrapped description line that satisfies every test
+                      for a skipped section heading ("Overdraft Protection
+                      Transfer"), which must not be allowed to close a section
   summit_multi        two share accounts in one statement, a "Continued from
                       previous page." header, a blank "- -" status row, and a
                       sub-dollar dividend
@@ -350,6 +353,38 @@ Dte Trnsction Descrition Amunt- Blnce-
 New Blnce $45.28-
 """
 
+# A wrapped description line that reads exactly like a section heading Chase
+# wants skipped. "Overdraft Protection Transfer" is title case, contains no
+# digits, and contains a SKIP_SECTIONS term -- so it satisfies every test the
+# heading branch applies. Treated as a heading it closes the section, discards
+# the record being built (its amount is still on the next line) and suppresses
+# the row after it too: two transactions lost, no error.
+#   electronic withdrawals: 250.00 + 130.00 = 380.00
+#   5,000.00 - 380.00 = 4,620.00
+CHECKING_HEADING_LOOKALIKE = """
+CHASE
+February 03, 2025 through March 03, 2025
+Account Number: 000000555000111
+
+CHECKING SUMMARY
+Chase Total Checking
+Beginning Balance 5,000.00
+Electronic Withdrawals 2 -380.00
+Ending Balance 4,620.00
+
+*start*electronic withdrawal
+ELECTRONIC WITHDRAWALS
+DATE DESCRIPTION AMOUNT
+02/22 Online Transfer To Sav 1111 Transaction
+Overdraft Protection Transfer
+250.00
+02/27 City Utility Bill Pymt PPD ID: 3390000420 130.00
+Total Electronic Withdrawals $380.00
+*end*electronic withdrawal
+
+Page 1 of 2
+"""
+
 # An account that is ALREADY overdrawn when the period opens: the true opening
 # is -40.72 but Summit prints it as "40.72-" like any other figure, so nothing
 # in the text says it is negative. Pinned by an xfail test in test_summit.py.
@@ -374,6 +409,7 @@ SAMPLES = {
     "credit_sections_dec2024.pdf": CREDIT,
     "credit_activity_jan2025.pdf": CREDIT_2DATE,
     "credit_foreign_jun2025.pdf": CREDIT_FOREIGN,
+    "checking_lookalike_feb2025.pdf": CHECKING_HEADING_LOOKALIKE,
     "summit_multi_apr2025.pdf": SUMMIT_MULTI,
     "summit_overdraft_may2025.pdf": SUMMIT_OVERDRAFT,
     "summit_negative_open_jun2025.pdf": SUMMIT_NEGATIVE_OPEN,

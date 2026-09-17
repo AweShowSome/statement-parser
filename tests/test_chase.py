@@ -163,3 +163,23 @@ def test_summary_sections_are_skipped(heading):
 def test_real_sections_are_not_skipped():
     for heading in ("DEPOSITS AND ADDITIONS", "ELECTRONIC WITHDRAWALS", "PURCHASE"):
         assert not is_skip_section(heading)
+
+
+def test_a_wrapped_description_cannot_close_a_section(parsed):
+    """"Overdraft Protection Transfer" is a merchant memo, not a heading.
+
+    It is title case, has no digits, and contains a SKIP_SECTIONS term, so it
+    passes every test the visible-heading branch applies. Treated as a heading
+    it closes the section, throws away the record being built (whose amount is
+    still on the following line) and suppresses the row after it as well.
+
+    Both rows must survive, and the statement must still balance.
+    """
+    r = parsed["checking_lookalike_feb2025.pdf"]
+    assert r.reconciles is True, r.failures()
+    assert len(r.txns) == 2, f"rows were dropped: {[t.description for t in r.txns]}"
+    assert sorted(t.amount for t in r.txns) == [-250.00, -130.00]
+    wrapped = next(t for t in r.txns if t.amount == -250.00)
+    assert "Overdraft Protection Transfer" in wrapped.description, \
+        "the wrapped line was dropped instead of joined onto its record"
+    assert all(t.category == "electronic_withdrawals" for t in r.txns)

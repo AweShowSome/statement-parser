@@ -89,8 +89,22 @@ def match_section(name: str, table: dict) -> tuple | None:
 
 
 def is_skip_section(name: str) -> bool:
+    """Is this a summary or disclosure heading, whose rows are not transactions?
+
+    A skip term may appear part-way into the heading rather than at the front --
+    the overdraft disclosure is titled "What You Need To Know About Overdrafts
+    And Overdraft Fees" -- so an interior match has to be allowed. It is
+    anchored to a word boundary, which is the difference between matching that
+    heading and matching a merchant whose name merely contains the letters.
+
+    This test is deliberately generous, and that is safe only because callers
+    refuse to consult it for a line that could be a wrapped description. See the
+    guard in parse_chase().
+    """
     n = re.sub(r"[^a-z& ]", "", name.lower()).strip()
-    return any(n.startswith(s) or s in n for s in SKIP_SECTIONS)
+    n = re.sub(r"\s+", " ", n)
+    return any(n.startswith(s) or re.search(rf"\b{re.escape(s)}", n)
+               for s in SKIP_SECTIONS)
 
 
 # --------------------------------------------------------------------------
@@ -416,7 +430,18 @@ def parse_chase(path: Path, folder_label: str, lines: list, res: FileResult) -> 
         # --- visible section headings ------------------------------------
         if looks_like_header(stripped) or re.match(
                 r"^[A-Z][A-Za-z&' ]{4,60}$", stripped):
-            if is_skip_section(stripped):
+            # A skip heading closes the current section and suppresses
+            # everything up to the next `*end*`. That is a lot of authority to
+            # hand to a pattern this loose: the title-case test above also
+            # matches a wrapped description line, and `is_skip_section` matches
+            # a term anywhere in it -- so a transfer described as "Overdraft
+            # Protection Transfer" would silently discard the rest of the
+            # section it sits in.
+            #
+            # A real heading never arrives mid-record: the total line before it
+            # is noise, which flushes the buffer. So requiring an empty buffer
+            # separates the two without weakening heading detection.
+            if not rec_lines and is_skip_section(stripped):
                 flush()
                 section, sign, in_skip = None, None, True
                 continue

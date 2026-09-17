@@ -81,28 +81,48 @@ def write_xlsx(groups: dict, path: Path) -> bool:
 
 
 def write_report(results: list, path: Path) -> str:
-    """Per-file row counts and balance checks."""
+    """Per-file row counts and balance checks.
+
+    The last three lines are the ones that matter: a statement is only proven
+    correct when its own opening->closing delta matches the transactions parsed
+    out of it. "not verified" is a weaker outcome than "balanced", not a
+    neutral one -- it means nothing was checked at all.
+    """
     lines = []
     total = 0
+    n_balanced = n_failed = n_unverified = n_skipped = n_discarded = 0
+
     for folder, res_list in results:
         lines.append(f"\n=== {folder} ===")
         for r in res_list:
             if r.error:
+                n_skipped += 1
                 lines.append(f"  [SKIP] {r.path.name}: {r.error}")
                 continue
             total += len(r.txns)
+            n_discarded += r.discarded
             rec = r.reconciles
             if rec is True:
                 flag = "balanced"
+                n_balanced += 1
             elif rec is False:
                 flag = f"CHECK: {r.failures()}"
+                n_failed += 1
             else:
-                flag = "no balance totals on statement"
+                flag = "NOT VERIFIED (no balance totals found on statement)"
+                n_unverified += 1
+            extra = f" | {r.discarded} discarded" if r.discarded else ""
             lines.append(
                 f"  {r.path.name}: {len(r.txns):>4} txns | {r.institution or '?'} "
                 f"{r.account_type} {r.account} | "
-                f"{r.period or 'period not found'} | {flag}")
+                f"{r.period or 'period not found'} | {flag}{extra}")
+
     lines.append(f"\nTOTAL TRANSACTIONS: {total}")
+    lines.append(
+        f"SUMMARY: {n_balanced} balanced, {n_failed} failed, "
+        f"{n_unverified} not verified, {n_skipped} refused, "
+        f"{n_discarded} non-transaction lines discarded")
+
     text = "\n".join(lines).strip()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text + "\n", encoding="utf-8")

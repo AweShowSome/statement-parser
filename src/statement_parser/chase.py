@@ -246,6 +246,14 @@ def build_txn(rec_lines: list, section: Optional[str], sign: Optional[int],
     So: if the head line already ends in money, parse the head and treat the
     rest as trailing description. Otherwise parse the whole joined record.
 
+    Returns None for a buffered record that holds no amount or no date. That is
+    usually correct -- it is how foreign-exchange detail lines like
+
+        08/08 EURO
+             1,540.00 X 0.050396103 (EXCHG RATE)
+
+    get discarded -- but callers count the Nones, because the same path would
+    swallow a real transaction whose amount failed to match.
     """
     if not rec_lines or section is None:
         return None
@@ -356,6 +364,7 @@ def parse_chase(path: Path, folder_label: str, lines: list, res: FileResult) -> 
     rec_lines: list = []
     rec_section = None
     rec_sign = None
+    discarded = 0
 
     def new_txn(**kw) -> Txn:
         return Txn(
@@ -370,7 +379,7 @@ def parse_chase(path: Path, folder_label: str, lines: list, res: FileResult) -> 
 
     def flush():
         """Turn the buffered record lines into a transaction."""
-        nonlocal rec_lines, rec_section, rec_sign
+        nonlocal rec_lines, rec_section, rec_sign, discarded
         if not rec_lines:
             rec_lines = []
             return
@@ -378,6 +387,8 @@ def parse_chase(path: Path, folder_label: str, lines: list, res: FileResult) -> 
         t = build_txn(buf, rec_section, rec_sign, is_credit, start, end, new_txn)
         if t is not None:
             txns.append(t)
+        else:
+            discarded += 1
 
     for raw in lines:
         line = raw.rstrip()
@@ -439,10 +450,14 @@ def parse_chase(path: Path, folder_label: str, lines: list, res: FileResult) -> 
     flush()
 
     # drop anything that is clearly a balance line rather than a transaction
+    before = len(txns)
     txns = [t for t in txns if t.date and
             not re.match(r"^(beginning|ending|previous|new|opening|closing)\s+"
                          r"balance", t.description, re.I)]
+    discarded += before - len(txns)
+
     res.txns = txns
+    res.discarded = discarded
     if res.opening_balance is not None and res.closing_balance is not None:
         res.checks.append(BalanceCheck(
             label=res.account or "account",

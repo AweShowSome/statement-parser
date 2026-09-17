@@ -143,6 +143,7 @@ def parse_summit(path: Path, folder_label: str, lines: list, res: FileResult) ->
     in_table = False
     pending: Optional[Txn] = None
     cont_used = 0
+    discarded = 0
 
     def flush():
         nonlocal pending, cont_used
@@ -196,7 +197,10 @@ def parse_summit(path: Path, folder_label: str, lines: list, res: FileResult) ->
             desc, fields = summit_fields(mr.group(2))
             amount, balance = fields[0], fields[1]
             if amount is None:
-                continue                      # status row ("Account Closed - -")
+                # A status row, e.g. "Qualified: Courtesy Overdraft Program - -".
+                # Counted so that a real row losing its amount is visible.
+                discarded += 1
+                continue
 
             sign = summit_sign(desc)
             if sign is None and balance is not None and cur["running"] is not None:
@@ -245,6 +249,7 @@ def parse_summit(path: Path, folder_label: str, lines: list, res: FileResult) ->
     if checking:
         res.account_type = "checking"
     res.account = ", ".join("..." + b["id"] for b in blocks) or ""
+    res.discarded = discarded
     for b in blocks:
         summit_fix_balances(b)
         res.txns.extend(b["txns"])

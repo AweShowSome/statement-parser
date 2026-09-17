@@ -82,12 +82,28 @@ class FileResult:
     opening_balance: Optional[float] = None
     closing_balance: Optional[float] = None
     error: str = ""
+    # Records the parser looked at and deliberately did not turn into a
+    # transaction (foreign-exchange detail lines, Summit status rows). Counted
+    # rather than silently dropped, so a future layout change shows up as this
+    # number rising instead of as rows quietly going missing.
+    discarded: int = 0
 
     @property
     def reconciles(self) -> Optional[bool]:
+        """True / False, or None when the statement stated no totals to check."""
         if not self.checks:
             return None
         return all(c.ok for c in self.checks)
+
+    @property
+    def verified(self) -> bool:
+        """Did this file actually prove itself?
+
+        `reconciles is None` means the opening/closing balances were never
+        found, so nothing was verified at all. That is a weaker position than
+        a clean check, and --strict treats it as a failure.
+        """
+        return self.reconciles is True
 
     def failures(self) -> str:
         return "; ".join(f"{c.label} off by {c.drift:+.2f}"
